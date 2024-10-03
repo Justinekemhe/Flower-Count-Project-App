@@ -37,6 +37,7 @@ The backend is built using FastAPI and provides an API for processing images.
     The API will be available at `http://127.0.0.1:8000`.
 ![Capture3](https://github.com/user-attachments/assets/c4f02ac9-4733-4734-b319-d17be0350503)
 
+
    
 
 4. **Test the API:**
@@ -64,10 +65,18 @@ The frontend is a web application built using HTML, CSS, and JavaScript.
 
    Run python -m http.server 8001
    Open the `index.html` file in a web browser. Ensure that the backend API is running before testing the frontend.
-Login information
+    Login information
 ![alt text](image.png)
-   ![Capture4](https://github.com/user-attachments/assets/c2a89347-6c82-4e3b-9c8c-4a3c5506569d)
-   ![Capture](https://github.com/user-attachments/assets/4518fdff-dc6b-4a99-a87d-e84ab156ccc5)
+
+![image](https://github.com/user-attachments/assets/d3533b48-9e92-4ede-89df-c6f945a7d74d)
+
+![image](https://github.com/user-attachments/assets/ef070d21-704b-467e-9546-48554d8ca683)
+
+![image](https://github.com/user-attachments/assets/e9214451-6bc1-4f91-978b-12660469cbf1)
+
+![image](https://github.com/user-attachments/assets/e325c1db-d519-4025-b232-480a1e485850)
+
+![image](https://github.com/user-attachments/assets/668478b9-a52c-4940-94ff-932f93771f08)
 
 
 ## Mobile Application
@@ -103,7 +112,7 @@ The mobile application is built using Flutter.
     ```
 
     The app will be available on your emulator or connected device.
-   ![WhatsApp Image 2024-09-15 at 19 56 13_19751c5e](https://github.com/user-attachments/assets/5d4c1fa9-0800-4b38-90a9-c925865c36d5)
+   ![mobile app](https://github.com/user-attachments/assets/5d4c1fa9-0800-4b38-90a9-c925865c36d5)
 
 
 ## Design Decisions and Challenges
