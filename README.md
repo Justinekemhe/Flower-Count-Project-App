@@ -64,7 +64,8 @@ The frontend is a web application built using HTML, CSS, and JavaScript.
 
    Run python -m http.server 8001
    Open the `index.html` file in a web browser. Ensure that the backend API is running before testing the frontend.
-
+Login information
+![alt text](image.png)
    ![Capture4](https://github.com/user-attachments/assets/c2a89347-6c82-4e3b-9c8c-4a3c5506569d)
    ![Capture](https://github.com/user-attachments/assets/4518fdff-dc6b-4a99-a87d-e84ab156ccc5)
 
