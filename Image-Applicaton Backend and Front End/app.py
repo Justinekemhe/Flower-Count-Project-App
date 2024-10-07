@@ -152,6 +152,9 @@ class ImageResponse(BaseModel):
 
 @app.post("/batch_predict/")
 async def batch_predict(files: List[UploadFile] = File(...), current_user: User = Depends(get_current_user)):
+    if not files:
+        raise HTTPException(status_code=400, detail="No files uploaded")
+    
     results = []
     for file in files:
         try:
@@ -160,16 +163,16 @@ async def batch_predict(files: List[UploadFile] = File(...), current_user: User 
             inputs = processor(images=image, return_tensors="pt")
             with torch.no_grad():
                 outputs = model(**inputs)
-            
-            # Example logic to count flowers based on bounding boxes
+
             bounding_boxes = outputs.pred_boxes
-            count = len(bounding_boxes)  # Count of detected objects
+            count = len(bounding_boxes)
             
             results.append({"filename": file.filename, "count": count})
         except Exception as e:
             logging.error(f"Error processing file {file.filename}: {str(e)}")
             results.append({"filename": file.filename, "error": str(e)})
     return {"results": results}
+
 
 if __name__ == "__main__":
     import uvicorn

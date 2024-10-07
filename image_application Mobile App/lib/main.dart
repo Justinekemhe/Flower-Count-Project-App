@@ -27,16 +27,94 @@ class MyApp extends StatelessWidget {
         brightness: Brightness.light,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      debugShowCheckedModeBanner: false, // Remove the debug banner
-      home: CameraScreen(camera: camera),
+      debugShowCheckedModeBanner: false,
+      home: LoginScreen(camera: camera),
+    );
+  }
+}
+
+class LoginScreen extends StatefulWidget {
+  final CameraDescription camera;
+
+  LoginScreen({required this.camera});
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  String _loginResult = '';
+
+  Future<void> _login() async {
+    final url =
+        'http://192.168.85.147:8000/token'; // Update with your FastAPI URL
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+      body: {
+        'username': _usernameController.text,
+        'password': _passwordController.text,
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = jsonDecode(response.body);
+      String token = responseData['access_token'];
+      // Navigate to CameraScreen and pass the token
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+            builder: (context) =>
+                CameraScreen(camera: widget.camera, token: token)),
+      );
+    } else {
+      setState(() {
+        _loginResult = 'Login failed. Please check your credentials.';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Login'),
+        backgroundColor: Colors.blueAccent,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
+              controller: _usernameController,
+              decoration: InputDecoration(labelText: 'Username'),
+            ),
+            TextField(
+              controller: _passwordController,
+              decoration: InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _login,
+              child: Text('Login'),
+            ),
+            SizedBox(height: 20),
+            Text(_loginResult, style: TextStyle(color: Colors.red)),
+          ],
+        ),
+      ),
     );
   }
 }
 
 class CameraScreen extends StatefulWidget {
   final CameraDescription camera;
+  final String token; // Token for authentication
 
-  CameraScreen({required this.camera});
+  CameraScreen({required this.camera, required this.token});
 
   @override
   _CameraScreenState createState() => _CameraScreenState();
@@ -46,7 +124,7 @@ class _CameraScreenState extends State<CameraScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
   final TextEditingController _metadataController = TextEditingController();
-  String _uploadResult = ''; // To store the upload result (flower count)
+  String _uploadResult = '';
 
   @override
   void initState() {
@@ -79,27 +157,38 @@ class _CameraScreenState extends State<CameraScreen> {
   }
 
   Future<void> _uploadImage(String filePath, String metadata) async {
-    final url = 'http://127.0.0.1:8000/batch_predict/';
+    final url =
+        'http://192.168.85.147:8000/batch_predict/'; // Use your machine's IP address
     final request = http.MultipartRequest('POST', Uri.parse(url))
-      ..files.add(await http.MultipartFile.fromPath('image', filePath))
+      ..files.add(await http.MultipartFile.fromPath('files',
+          filePath)) // Update 'image' to 'files' for your FastAPI endpoint
       ..fields['metadata'] = metadata;
 
-    final response = await request.send();
-    final responseBody = await http.Response.fromStream(response);
+    // Add the token to the request headers
+    request.headers.addAll({
+      HttpHeaders.authorizationHeader: 'Bearer ${widget.token}',
+      'Content-Type': 'application/json',
+    });
 
-    if (response.statusCode == 200) {
-      // Parse the response (assuming the response is JSON with 'count' field)
-      final responseData = jsonDecode(responseBody.body);
-      final flowerCount = responseData['count'];
+    try {
+      final response = await request.send();
+      final responseBody = await http.Response.fromStream(response);
 
-      // Update the state with the result (flower count)
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(responseBody.body);
+        // Handle the response data according to your API
+        setState(() {
+          _uploadResult =
+              responseData.toString(); // Update with your response structure
+        });
+      } else {
+        setState(() {
+          _uploadResult = 'Upload failed. Please try again.';
+        });
+      }
+    } catch (e) {
       setState(() {
-        _uploadResult = 'Flower Count: $flowerCount';
-      });
-    } else {
-      // Handle error
-      setState(() {
-        _uploadResult = 'Upload failed. Please try again.';
+        _uploadResult = 'Error: $e';
       });
     }
   }
@@ -158,7 +247,6 @@ class _CameraScreenState extends State<CameraScreen> {
               child: Text('Capture and Upload'),
             ),
           ),
-          // Display the result (flower count) below the button
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Text(
